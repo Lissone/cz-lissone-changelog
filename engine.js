@@ -71,15 +71,19 @@ module.exports = function(options) {
         {
           type: 'list',
           name: 'type',
-          message: "Select the type of change that you're committing:",
-          choices: choices,
-          default: options.defaultType
+          message: 'Selecione o tipo de mudança que você está commitando: ',
+          choices: [
+            { value: 'feat', name: 'feat:     Uma nova feature' },
+            { value: 'fix', name: 'fix:      Um conserto de bug' },
+            { value: 'refactor', name: 'refactor: Uma alteração de código que não corrige um bug nem adiciona um recurso'},
+            { value: 'docs', name: 'docs:     Apenas mudanças em documentação' },
+            { value: 'chore', name: 'chore:     Alterações no processo de compilação ou ferramentas auxiliares e bibliotecas' },
+          ],
         },
         {
           type: 'input',
           name: 'scope',
-          message:
-            'What is the scope of this change (e.g. component or file name): (press enter to skip)',
+          message: 'Qual é o ESCOPO desta mudança: (opcional) ',
           default: options.defaultScope,
           filter: function(value) {
             return options.disableScopeLowerCase
@@ -92,23 +96,23 @@ module.exports = function(options) {
           name: 'subject',
           message: function(answers) {
             return (
-              'Write a short, imperative tense description of the change (max ' +
+              'Escreva uma descrição breve e sucinta das mudanças: (max ' +
               maxSummaryLength(options, answers) +
-              ' chars):\n'
+              ' caracteres):\n'
             );
           },
           default: options.defaultSubject,
           validate: function(subject, answers) {
             var filteredSubject = filterSubject(subject, options.disableSubjectLowerCase);
             return filteredSubject.length == 0
-              ? 'subject is required'
+              ? 'A descrição é obrigatória'
               : filteredSubject.length <= maxSummaryLength(options, answers)
               ? true
-              : 'Subject length must be less than or equal to ' +
+              : 'O comprimento da descrição deve ser menor ou igual a ' +
                 maxSummaryLength(options, answers) +
-                ' characters. Current length is ' +
+                ' caracteres. O comprimento atual é ' +
                 filteredSubject.length +
-                ' characters.';
+                ' caracteres.';
           },
           transformer: function(subject, answers) {
             var filteredSubject = filterSubject(subject, options.disableSubjectLowerCase);
@@ -126,13 +130,13 @@ module.exports = function(options) {
           type: 'input',
           name: 'body',
           message:
-            'Provide a longer description of the change: (press enter to skip)\n',
+            'Forneça uma descrição mais detalhada da mudança: (opcional) \n',
           default: options.defaultBody
         },
         {
           type: 'confirm',
           name: 'isBreaking',
-          message: 'Are there any breaking changes?',
+          message: 'Existe BREAKING CHANGES? (opcional)',
           default: false
         },
         {
@@ -140,21 +144,21 @@ module.exports = function(options) {
           name: 'breakingBody',
           default: '-',
           message:
-            'A BREAKING CHANGE commit requires a body. Please enter a longer description of the commit itself:\n',
+            'Um commit de BREAKING CHANGE requer uma descrição detalhada. Por favor, insira com mais detalhes as mudanças de BREAKING CHANGES:\n',
           when: function(answers) {
             return answers.isBreaking && !answers.body;
           },
           validate: function(breakingBody, answers) {
             return (
               breakingBody.trim().length > 0 ||
-              'Body is required for BREAKING CHANGE'
+              'A descrição detalhada de BREAKING CHANGE é obrigatória.'
             );
           }
         },
         {
           type: 'input',
           name: 'breaking',
-          message: 'Describe the breaking changes:\n',
+          message: 'Descreva de forma breve e imperativa o BREAKING CHANGE:\n',
           when: function(answers) {
             return answers.isBreaking;
           }
@@ -163,7 +167,7 @@ module.exports = function(options) {
         {
           type: 'confirm',
           name: 'isIssueAffected',
-          message: 'Does this change affect any open issues?',
+          message: 'Essa mudança afeta alguma issue? (opcional)',
           default: options.defaultIssues ? true : false
         },
         {
@@ -171,7 +175,7 @@ module.exports = function(options) {
           name: 'issuesBody',
           default: '-',
           message:
-            'If issues are closed, the commit requires a body. Please enter a longer description of the commit itself:\n',
+            'Se a issue for fechada, o commit requer uma descrição detalhada. Por favor, insira uma descrição mais longa do próprio commit:\n',
           when: function(answers) {
             return (
               answers.isIssueAffected && !answers.body && !answers.breakingBody
@@ -181,7 +185,7 @@ module.exports = function(options) {
         {
           type: 'input',
           name: 'issues',
-          message: 'Add issue references (e.g. "fix #123", "re #123".):\n',
+          message: 'Adicione a referência da issue (e.g. "fix #123", "re #123".):\n',
           when: function(answers) {
             return answers.isIssueAffected;
           },
@@ -197,10 +201,10 @@ module.exports = function(options) {
         };
 
         // parentheses are only needed when a scope is present
-        var scope = answers.scope ? '(' + answers.scope + ')' : '';
+        var scope = answers.scope ? '[' + answers.scope + ']' : '';
 
         // Hard limit this line in the validate
-        var head = answers.type + scope + ': ' + answers.subject;
+        var head = answers.type + ':' + scope + ' ' + answers.subject;
 
         // Wrap these lines at options.maxLineWidth characters
         var body = answers.body ? wrap(answers.body, wrapOptions) : false;
