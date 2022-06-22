@@ -1,60 +1,117 @@
-# cz-conventional-changelog
+## Installing the command line tool
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/commitizen/cz-conventional-changelog.svg)](https://greenkeeper.io/)
+Commitizen is currently tested against Node.js 12, 14, & 16, although it may work in
+older versions of Node.js. You should also have npm 6 or greater.
 
-Status:
-[![npm version](https://img.shields.io/npm/v/cz-conventional-changelog.svg?style=flat-square)](https://www.npmjs.org/package/cz-conventional-changelog)
-[![npm downloads](https://img.shields.io/npm/dm/cz-conventional-changelog.svg?style=flat-square)](http://npm-stat.com/charts.html?package=cz-conventional-changelog&from=2015-08-01)
-[![Build Status](https://img.shields.io/travis/commitizen/cz-conventional-changelog.svg?style=flat-square)](https://travis-ci.org/commitizen/cz-conventional-changelog)
+Installation is as simple as running the following command (if you see `EACCES` error, reading [fixing npm permissions](https://docs.npmjs.com/getting-started/fixing-npm-permissions) may help):
 
-Part of the [commitizen](https://github.com/commitizen/cz-cli) family. Prompts for [conventional changelog](https://github.com/conventional-changelog/conventional-changelog) standard.
+```sh
+npm install -g commitizen
+```
 
-## Configuration
+## Adding Commitizen to your repo
 
-### package.json
+There are two ways to use it in your repo.
 
-Like commitizen, you specify the configuration of cz-conventional-changelog through the package.json's `config.commitizen` key.
+### Simply and locally
 
-```json5
-{
-// ...  default values
-    "config": {
-        "commitizen": {
-            "path": "./node_modules/cz-conventional-changelog",
-            "disableScopeLowerCase": false,
-            "disableSubjectLowerCase": false,
-            "maxHeaderWidth": 100,
-            "maxLineWidth": 100,
-            "defaultType": "",
-            "defaultScope": "",
-            "defaultSubject": "",
-            "defaultBody": "",
-            "defaultIssues": "",
-            "types": {
-              ...
-              "feat": {
-                "description": "A new feature",
-                "title": "Features"
-              },
-              ...
-            }
-        }
+Simply use `git cz` or just `cz` instead of `git commit` when committing. You can also use `git-cz`, which is an alias for `cz`.
+
+_Alternatively_, if you are using **npm 5.2+** you can [use `npx`](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b) instead of installing globally:
+
+```sh
+npx cz
+```
+
+or as an npm script:
+
+```json
+  ...
+  "scripts": {
+    "commit": "cz"
+  }
+```
+
+When you're working in a Commitizen-friendly repository, you'll be prompted to fill in any required fields, and your commit messages will be formatted according to the standards defined by project maintainers.
+
+### Making your repo Commitizen friendly
+
+For this example, we'll be setting up our repo to use this adapter (cz-lissone-changelog).
+First, install the Commitizen CLI tools:
+
+```sh
+npm install commitizen -g
+```
+
+Next, initialize your project to use the cz-lissone-changelog adapter by typing:
+
+```sh
+commitizen init cz-lissone-changelog --save-dev --save-exact
+```
+
+Or if you are using Yarn:
+
+```sh
+commitizen init cz-lissone-changelog --yarn --dev --exact
+```
+
+Note that if you want to force install over the top of an old adapter, you can apply the `--force` argument. For more information on this, just run `commitizen help`.
+
+The above command does three things for you:
+
+1. Installs the cz-lissone-changelog adapter npm module
+2. Saves it to `package.json`'s `devDependencies`
+3. Adds the `config.commitizen` key to the root of your `package.json` file as shown here:
+
+```json
+...
+  "config": {
+    "commitizen": {
+      "path": "cz-lissone-changelog"
     }
-// ...
+  }
+```
+
+Alternatively, Commitizen configs may be added to a `.czrc` file:
+
+```json
+{
+  "path": "cz-lissone-changelog"
 }
 ```
 
-### Environment variables
+This just tells Commitizen which adapter we actually want our contributors to use when they try to commit to this repo.
 
-The following environment variables can be used to override any default configuration or package.json based configuration.
+`commitizen.path` is resolved via [require.resolve](https://nodejs.org/api/globals.html#globals_require_resolve) and supports:
 
-* CZ_TYPE = defaultType
-* CZ_SCOPE = defaultScope
-* CZ_SUBJECT = defaultSubject
-* CZ_BODY = defaultBody
-* CZ_MAX_HEADER_WIDTH = maxHeaderWidth
-* CZ_MAX_LINE_WIDTH = maxLineWidth
+- npm modules
+- directories relative to `process.cwd()` containing an `index.js` file
+- file base names relative to `process.cwd()` with `.js` extension
+- full relative file names
+- absolute paths
 
-### Commitlint
+Please note that in the previous version of Commitizen we used czConfig. **czConfig has been deprecated**, and you should migrate to the new format before Commitizen 3.0.0.
 
-If using the [commitlint](https://github.com/conventional-changelog/commitlint) js library, the "maxHeaderWidth" configuration property will default to the configuration of the "header-max-length" rule instead of the hard coded value of 100.  This can be ovewritten by setting the 'maxHeaderWidth' configuration in package.json or the CZ_MAX_HEADER_WIDTH environment variable.
+## Conventional commit messages as a Global utility
+
+Install `commitizen` globally, if you have not already.
+
+```sh
+npm install -g commitizen
+```
+
+Install your preferred `commitizen` adapter globally.
+
+```sh
+npm install -g cz-lissone-changelog
+```
+
+Create a `.czrc` file in your `home` directory, with `path` referring to the preferred, globally-installed, `commitizen` adapter.
+
+```sh
+echo '{ "path": "cz-lissone-changelog" }' > ~/.czrc
+```
+
+You are all set! Now `cd` into any `git` repository and use `git cz` instead of `git commit`, and you will find the `commitizen` prompt.
+
+Pro tip: You can use all the `git commit` `options` with `git cz`. For example: `git cz -a`.
